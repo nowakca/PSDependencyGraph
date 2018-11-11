@@ -1,7 +1,8 @@
 function show-PSScriptCallGraph {
     <#
     .DESCRIPTION
-    Given a set of Powershell source files, emit a list of which functions call which other functions, and optionally show a graph
+    Given a set of Powershell source files, emit a list of which functions call which other functions, and optionally generate and/or show a graph illustrating those dependencies.
+
     To generate a graph, specify a -OutputFormat (png is a reasonable one if you're not sure what to choose)
     
     .EXAMPLE
@@ -25,7 +26,7 @@ function show-PSScriptCallGraph {
     Read all the .ps1 files from the current directory and present a list of functions in them, generate a png formatted graph, but don't launch it.
 
     .NOTES
-    The graphing portion relies on PSGraph, by Kevin Marquette
+    The optional graphing portion relies on PSGraph, by Kevin Marquette
     https://github.com/KevinMarquette/PSGraph
 
     This has only been tested on Powershell Core 6.1, but it should work in most modern Powershell verisons.
@@ -74,6 +75,8 @@ function show-PSScriptCallGraph {
         $HideGraph
     )
 
+
+
     Begin {
         $tokens = New-Object Collections.ArrayList
 
@@ -92,6 +95,8 @@ function show-PSScriptCallGraph {
         # This is just to make deduplication fast and easy
         $called = @{}
     } # Begin Block
+
+
 
     Process {
         $parseErrors = @() # Need something to store the errors in, even if I don't do anything with them
@@ -118,7 +123,7 @@ function show-PSScriptCallGraph {
         foreach ($token in $tokens) {
             $type = $token.Type  # Keyword, CommandArgument, GroupStart, Operator, etc
             $content = $token.Content # The text that comprises the token ("function", "{", etc)
-            write-debug  "currentState:$state type:$type content:$content"
+            write-debug  "currentState:'$state' type:'$type' content:'$content'"
         
             switch ($state) {
                 init {
@@ -128,7 +133,7 @@ function show-PSScriptCallGraph {
 
                         # Move to the next state so we can catch the name
                         $state = [mState]::functionSeen
-                        showContext $context
+                        showContext -state $state -context $context
                     }
                 } # switch init
         
@@ -143,24 +148,24 @@ function show-PSScriptCallGraph {
                         # Move to the next state, so we can watch braces go by and we see when we're out of our function definition
                         # As well as watching for function calls
                         $state = [mState]::functionNamed
-                        showContext $context
+                        showContext -state $state -context $context
                     } else {
                         # Guess you have some bad code, oh well... just start over. I'm not that worried about trying to make real sense of bad code
                         $state = [mState]::init
                         write-warning "Invalid function definition"
-                        showContext $context
+                        showContext -state $state -context $context
                     }
                 } #switch functionSeen
-        
+
                 functionNamed {
                     if ($type -eq "GroupStart" -and "{", "@{" -contains $content) {
                         # Opening a scope
                         ($context.Peek()).braceDepth++ 
-                        showContext $context
+                        showContext -state $state -context $context
                     } elseif ($type -eq "GroupEnd" -and $content -eq "}") {
                         # Closing a scope
                         ($context.Peek()).braceDepth--; 
-                        showContext $context
+                        showContext -state $state -context $context
 
                         # If we've closed out our last scope (ie, done with the function)...
                         if ( ($context.Peek()).braceDepth -lt 1 ) {
@@ -171,10 +176,10 @@ function show-PSScriptCallGraph {
                             # otherwise, keep cycling until we're done with the outermost function
                             if ($context.count -eq 0) {
                                 $state = [mState]::init
-                                showContext $context
+                                showContext -state $state -context $context
                             } else {
                                 $state = [mState]::functionNamed
-                                showContext $context
+                                showContext -state $state -context $context
                             }
                         } 
                     } elseif ($type -eq "Command") {
@@ -183,6 +188,10 @@ function show-PSScriptCallGraph {
                         # Record the fact that function $func called command $content
                         $func = ($context.Peek()).Name
                         $called[$func][$content] = $true
+                    } elseif ($type -eq "Keyword" -and $content -eq "function") {
+                        $context.Push( [PSCustomObject]@{type = $content; name = ""; braceDepth = 0} )
+                        $state = [mState]::functionSeen
+                        showContext -state $state -context $context
                     } else {
                         #ignore
                     }
@@ -196,6 +205,7 @@ function show-PSScriptCallGraph {
         } # foreach token
 
     } # Process Block
+
 
 
     End {
@@ -245,21 +255,3 @@ function show-PSScriptCallGraph {
         $entries | format-table -auto
     } # End Block
 }
-
-
-
-
-function showContext {
-    Param(
-        # Context object to show
-        $context
-    )
-
-    if ($context -and $context.count -gt 0) {
-        write-verbose "State -> $state  $( ($context.Peek()) | ConvertTo-Json -Compress ) "
-    } else {
-        write-verbose "State -> $state  (no context)"
-    }
-}
-
-

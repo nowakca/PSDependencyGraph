@@ -6,15 +6,23 @@ Kick off `show-PSScriptCallGraph` to get a sense of what is calling what and you
 
 This is NOT a polished product, I got it working enough to get what I needed out of it at the moment, but it should be easily expandable to wider use cases.
 
+## Powershell compatibility
+
+This has only been tested on Powershell Core 6.1 so far, but there's no reason it shouldn't work on any reasonably recent version of Powershell.
+
 ## Usage
 
-I haven't made this into a module yet, so for now, just dot source the file, and you'll have `show-PSScriptCallGraph` at your disposal.
+`Import-Module PSDependencyGraph` to get things loaded.
 
 Example usage:
 
     show-PSScriptCallGraph ScriptMapper.ps1
 
 Refer to `get-help show-PSScriptCallGraph` for more details
+
+## Scope
+
+This currently only parses the given Powershell scripts for function definitions and commands. It does understand functions nested in other functions, but it doesn't understand dynamically generated functions nor does it know what to do with modules or variables.
 
 ## Dependencies
 
