@@ -1,4 +1,4 @@
-# ScriptMapper
+# PSDependencyGraph
 
 Have you inherited some powershell code with a bunch of functions but you don't know where to get started? This can help.
 
@@ -16,7 +16,11 @@ This has only been tested on Powershell Core 6.1 so far, but there's no reason i
 
 Example usage:
 
-    show-PSScriptCallGraph ScriptMapper.ps1
+    show-PSScriptCallGraph sampleScript.ps1
+
+Or of you want to see the dependencies within this module as a PDF File (Warning: not very interesting):
+
+    get-ChildItem (get-module PSDependencyGraph).ModuleBase -Recurse -Filter *.ps1 | show-PSScriptCallGraph -OutputFormat pdf
 
 Refer to `get-help show-PSScriptCallGraph` for more details
 
