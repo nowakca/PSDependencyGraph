@@ -2,7 +2,7 @@
 
 Have you inherited some powershell code with a bunch of functions but you don't know where to get started? This can help.
 
-Kick off `show-PSScriptCallGraph` to get a sense of what is calling what and you'll have a good idea where to start in trying to understand that code.
+Kick off `build-PSScriptCallGraph` to get a sense of what is calling what and you'll have a good idea where to start in trying to understand that code.
 
 This is NOT a polished product, I got it working enough to get what I needed out of it at the moment, but it should be easily expandable to wider use cases.
 
@@ -16,13 +16,13 @@ This has only been tested on Powershell Core 6.1 so far, but there's no reason i
 
 Example usage:
 
-    show-PSScriptCallGraph sampleScript.ps1
+    build-PSScriptCallGraph sampleScript.ps1
 
 Or of you want to see the dependencies within this module as a PDF File (Warning: not very interesting):
 
-    get-ChildItem (get-module PSDependencyGraph).ModuleBase -Recurse -Filter *.ps1 | show-PSScriptCallGraph -OutputFormat pdf
+    get-ChildItem (get-module PSDependencyGraph).ModuleBase -Recurse -Filter *.ps1 | build-PSScriptCallGraph -OutputFormat pdf
 
-Refer to `get-help show-PSScriptCallGraph` for more details
+Refer to `get-help build-PSScriptCallGraph` for more details
 
 ## Scope
 

@@ -1,4 +1,4 @@
-function show-PSScriptCallGraph {
+function build-PSScriptCallGraph {
     <#
     .DESCRIPTION
     Given a set of Powershell source files, emit a list of which functions call which other functions, and optionally generate and/or show a graph illustrating those dependencies.
@@ -6,22 +6,22 @@ function show-PSScriptCallGraph {
     To generate a graph, specify a -OutputFormat (png is a reasonable one if you're not sure what to choose)
     
     .EXAMPLE
-    get-childitem *.ps1 | show-PSScriptCallGraph
+    get-childitem *.ps1 | build-PSScriptCallGraph
 
     Read all the .ps1 files from the current directory and present a list of functions in them, along with which functions they called that were among the given files.
 
     .EXAMPLE
-    show-PSScriptCallGraph -psFilePath "myFile.ps1" -dontRestrainGraphToProvidedFunctions
+    build-PSScriptCallGraph -psFilePath "myFile.ps1" -dontRestrainGraphToProvidedFunctions
 
     Read all the .ps1 files from the current directory and present a list of functions in them, along with which functions they called, regardless of where they come from.
 
     .EXAMPLE
-    Get-ChildItem *.ps1 | show-PSScriptCallGraph -OutputFormat png
+    Get-ChildItem *.ps1 | build-PSScriptCallGraph -OutputFormat png
 
     Read all the .ps1 files from the current directory and present a list of functions in them, generate a png formatted graph, and then launch it.
 
     .EXAMPLE
-    Get-ChildItem *.ps1 | show-PSScriptCallGraph -OutputFormat png -HideGraph
+    Get-ChildItem *.ps1 | build-PSScriptCallGraph -OutputFormat png -HideGraph
 
     Read all the .ps1 files from the current directory and present a list of functions in them, generate a png formatted graph, but don't launch it.
 

@@ -23,7 +23,7 @@ function test4 {
 
 
 Import-Module ../PSDependencyGraph -Force
-show-PSScriptCallGraph ./test.ps1
+build-PSScriptCallGraph ./test.ps1
 
 <#
 caller  called
